@@ -95,7 +95,12 @@ class TurnstileAPIServer:
         if useragent:
             self.browser_args.append(f"--user-agent={useragent}")
 
+        self.api_key = os.getenv("API_KEY", "")
+        if not self.api_key:
+            logger.warning("API_KEY environment variable is not set. All requests will be rejected.")
+
         self._setup_routes()
+        self._setup_middleware()
 
     @staticmethod
     def _load_results():
@@ -123,6 +128,27 @@ class TurnstileAPIServer:
         self.app.route('/result', methods=['GET'])(self.get_result)
         self.app.route('/solve', methods=['GET'])(self.solve_sync)
         self.app.route('/')(self.index)
+
+    def _setup_middleware(self) -> None:
+        """Set up API key middleware."""
+        @self.app.before_request
+        async def validate_api_key():
+            if request.path == '/':
+                return None
+            
+            provided_key = request.args.get('apikey') or request.headers.get('X-API-Key') or request.headers.get('Authorization', '').replace('Bearer ', '')
+            
+            if not self.api_key:
+                return jsonify({
+                    "status": "error",
+                    "error": "Server API key not configured"
+                }), 500
+            
+            if provided_key != self.api_key:
+                return jsonify({
+                    "status": "error",
+                    "error": "Invalid or missing API key"
+                }), 401
 
     async def _startup(self) -> None:
         """Initialize the browser and page pool on startup."""
