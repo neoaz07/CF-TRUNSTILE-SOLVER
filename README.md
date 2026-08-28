@@ -8,7 +8,7 @@ Production-grade Cloudflare Turnstile solving service based on [Theyka/Turnstile
 export API_KEY="your_secret_key_here"
 pip install -r requirements.txt
 python -m patchright install chromium
-python api_solver.py --headless false --useragent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --thread 1 --port 5000
+python api_solver.py --headless true --useragent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --thread 1 --port 5000
 ```
 
 ## Authentication
@@ -25,6 +25,19 @@ curl -H "X-API-Key: your_secret_key_here" "http://localhost:5000/solve?sitekey=0
 ```
 
 ## API Endpoints
+
+### `GET /`
+
+Returns service info.
+
+**Response:**
+```json
+{
+  "name": "TRUSNSTILE SOLVER PRO",
+  "credits": "NEOKEX",
+  "message": "For API-KEY ask NEOKEX"
+}
+```
 
 ### `GET /solve`
 
@@ -66,7 +79,7 @@ docker run -p 5000:5000 -e API_KEY="your_secret_key_here" turnstile-solver
 
 - Set environment variable `API_KEY` to your secret key
 - Set build command: `pip install -r requirements.txt && python -m patchright install chromium`
-- Set start command: `python api_solver.py --headless false --thread 1 --port $PORT --host 0.0.0.0`
+- Set start command: `python api_solver.py --headless true --thread 1 --port $PORT --host 0.0.0.0`
 - Use the included `Dockerfile` for container deployment
 
 ## Maintained by

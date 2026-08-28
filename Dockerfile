@@ -59,5 +59,5 @@ COPY . .
 # Expose port
 EXPOSE 5000
 
-# Run with Xvfb for headless display
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 & export DISPLAY=:99 && python api_solver.py --headless false --useragent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' --thread 1 --port 5000 --host 0.0.0.0"]
+# Run in headless mode without Xvfb
+CMD ["sh", "-c", "python api_solver.py --headless true --useragent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' --thread 1 --port 5000 --host 0.0.0.0"]
