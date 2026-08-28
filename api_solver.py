@@ -371,8 +371,9 @@ class TurnstileAPIServer:
         """Serve the API info page."""
         return jsonify({
             "name": "TRUSNSTILE SOLVER PRO",
-            "credits": "NEOKEX",
-            "message": "For API-KEY ask NEOKEX"
+            "maintained_by": "NEOKEX",
+            "message": "For API-KEY ask NEOKEX",
+            "timestamp": time.strftime('%Y-%m-%d %H:%M:%S')
         })
 
 
