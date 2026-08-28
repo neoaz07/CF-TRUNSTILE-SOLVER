@@ -121,6 +121,7 @@ class TurnstileAPIServer:
         self.app.before_serving(self._startup)
         self.app.route('/turnstile', methods=['GET'])(self.process_turnstile)
         self.app.route('/result', methods=['GET'])(self.get_result)
+        self.app.route('/solve', methods=['GET'])(self.solve_sync)
         self.app.route('/')(self.index)
 
     async def _startup(self) -> None:
@@ -291,6 +292,53 @@ class TurnstileAPIServer:
             status_code = 422
 
         return result, status_code
+
+    async def solve_sync(self):
+        """Synchronous Turnstile solver endpoint."""
+        url = request.args.get('siteurl') or request.args.get('url')
+        sitekey = request.args.get('sitekey')
+        action = request.args.get('action')
+        cdata = request.args.get('cdata')
+
+        if not url or not sitekey:
+            return jsonify({
+                "status": "error",
+                "error": "Both 'sitekey' and 'siteurl' are required",
+                "maintained_by": "NEOKEX"
+            }), 400
+
+        task_id = str(uuid.uuid4())
+        self.results[task_id] = "CAPTCHA_NOT_READY"
+
+        try:
+            await self._solve_turnstile(task_id=task_id, url=url, sitekey=sitekey, action=action, cdata=cdata)
+
+            result = self.results.get(task_id, {"status": "error", "error": "No result"})
+            status_code = 200
+
+            if result.get("value") == "CAPTCHA_FAIL" or result.get("status") == "error":
+                status_code = 422
+
+            is_success = result.get("value") and result.get("value") != "CAPTCHA_FAIL"
+
+            response = {
+                "status": "success" if is_success else "error",
+                "token": result.get("value"),
+                "time_taken": result.get("elapsed_time"),
+                "maintained_by": "NEOKEX"
+            }
+
+            if not is_success:
+                response["error"] = result.get("error")
+
+            return jsonify(response), status_code
+        except Exception as e:
+            logger.error(f"Unexpected error in sync solve: {str(e)}")
+            return jsonify({
+                "status": "error",
+                "error": str(e),
+                "maintained_by": "NEOKEX"
+            }), 500
 
     @staticmethod
     async def index():

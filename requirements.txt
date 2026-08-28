@@ -1,5 +1,4 @@
-quart
-asyncio
-argparse
-patchright
-camoufox[geoip]
+quart==0.20.0
+patchright==1.62.1
+camoufox[geoip]==0.5.5
+aiofiles==23.2.0
